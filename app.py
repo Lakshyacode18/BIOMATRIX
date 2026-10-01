@@ -103,7 +103,16 @@ with right:
         st.subheader("Possible conditions")
         st.bar_chart({d: round(p * 100, 1) for d, p in ranked}, horizontal=True)
         top, top_p = ranked[0]
-        st.metric("Most likely", top, f"{top_p * 100:.1f}%")
+        st.metric(
+            "Highest-ranked condition",
+            top,
+            f"{top_p * 100:.0f}% (model estimate)",
+            delta_color="off",
+        )
+        st.caption(
+            "Scores are relative likelihoods from a prototype built on synthetic data. "
+            "They are not clinical probabilities."
+        )
 
         for a, b, pa, pb in model.possible_coinfections(evidence, COINFECTION_PAIRS):
             st.warning(f"**Possible co-infection:** {a} ({pa*100:.0f}%) and {b} ({pb*100:.0f}%) are "
