@@ -2,10 +2,18 @@
 import streamlit as st
 
 from knowledge import COINFECTION_PAIRS, DISCLAIMER, FEATURES
-from medications import PATIENT_FACTORS, get_plan
 from model import build_model
 
-st.set_page_config(page_title="AI Doctor Assistant", page_icon="🩺", layout="wide")
+SHOW_MEDICATIONS = False
+
+if SHOW_MEDICATIONS:
+    from medications import PATIENT_FACTORS, get_plan
+
+st.set_page_config(
+    page_title="Bio Matrix: Clinical Decision Support (Prototype v0.1)",
+    page_icon="🩺",
+    layout="wide",
+)
 
 
 @st.cache_resource
@@ -24,7 +32,7 @@ def fmt(f):
     return FEATURES[f]["label"]
 
 
-st.title("🩺 AI Doctor Assistant")
+st.title("Bio Matrix: Clinical Decision Support (Prototype v0.1)")
 st.warning(DISCLAIMER)
 
 left, right = st.columns([1, 1])
@@ -33,8 +41,13 @@ evidence = {}
 with left:
     st.header("Patient findings")
 
-    factors = st.multiselect("Patient factors (affect medicine cautions)", list(PATIENT_FACTORS),
-                             format_func=lambda k: PATIENT_FACTORS[k])
+    factors = []
+    if SHOW_MEDICATIONS:
+        factors = st.multiselect(
+            "Patient factors (affect medicine cautions)",
+            list(PATIENT_FACTORS),
+            format_func=lambda key: PATIENT_FACTORS[key],
+        )
 
     st.subheader("Stage 1 - Symptoms")
     present = st.multiselect("Symptoms present", names("symptom"), format_func=fmt)
@@ -129,14 +142,15 @@ with right:
             state = "present" if evidence[f] else "absent"
             st.write(f"{icon} {fmt(f)} ({state}): {score:+.2f}")
 
-        st.subheader("Medication reference (for doctor review)")
-        chosen = st.selectbox("Show plan for", [d for d, _ in ranked], index=0)
-        plan = get_plan(chosen, factors)
-        st.write(plan["summary"])
-        for m in plan["medicines"]:
-            st.markdown(f"**{m['name']}** - {m['purpose']}. {m['notes']}")
-            for w in m["warnings"]:
-                st.warning(w)
-        st.markdown("**Avoid:** " + "; ".join(plan["avoid"]))
-        st.markdown("**Monitor:** " + "; ".join(plan["monitor"]))
-        st.error("Urgent review if: " + "; ".join(plan["red_flags"]))
+        if SHOW_MEDICATIONS:
+            st.subheader("Medication reference (for doctor review)")
+            chosen = st.selectbox("Show plan for", [d for d, _ in ranked], index=0)
+            plan = get_plan(chosen, factors)
+            st.write(plan["summary"])
+            for medicine in plan["medicines"]:
+                st.markdown(f"**{medicine['name']}** - {medicine['purpose']}. {medicine['notes']}")
+                for warning in medicine["warnings"]:
+                    st.warning(warning)
+            st.markdown("**Avoid:** " + "; ".join(plan["avoid"]))
+            st.markdown("**Monitor:** " + "; ".join(plan["monitor"]))
+            st.error("Urgent review if: " + "; ".join(plan["red_flags"]))

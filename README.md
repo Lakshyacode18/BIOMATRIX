@@ -1,6 +1,6 @@
 # BioMatrix
 
-BioMatrix is a local Streamlit website that combines the synthetic patient-data generator, Naive Bayes model, knowledge base, and clinician-facing medication reference.
+Bio Matrix is a Streamlit clinical decision-support prototype using a synthetic patient-data generator, Naive Bayes model, and knowledge base. Medication guidance is disabled in the product UI by default.
 
 ## Run locally
 
