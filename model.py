@@ -93,6 +93,17 @@ class NaiveBayesDiagnoser:
         contrib.sort(key=lambda kv: abs(kv[1]), reverse=True)
         return contrib
 
+    def possible_coinfections(self, evidence, pairs, threshold=0.20):
+        """Flag disease pairs that are BOTH still plausible together (each above
+        `threshold`), instead of forcing a single winner. Only pairs known to occur
+        together clinically should be passed in (see knowledge.COINFECTION_PAIRS)."""
+        post = self.posterior(evidence)
+        found = []
+        for a, b in pairs:
+            if a in post and b in post and post[a] >= threshold and post[b] >= threshold:
+                found.append((a, b, post[a], post[b]))
+        return found
+
 
 def build_model(n=6000, seed=42):
     rows = generate(n, seed)

@@ -1,11 +1,11 @@
-"""Streamlit website for the BioMatrix clinical decision-support prototype."""
+"""Streamlit web UI:  streamlit run app.py"""
 import streamlit as st
 
-from knowledge import DISCLAIMER, FEATURES
+from knowledge import COINFECTION_PAIRS, DISCLAIMER, FEATURES
 from medications import PATIENT_FACTORS, get_plan
 from model import build_model
 
-st.set_page_config(page_title="BioMatrix | Clinical Assistant", page_icon="B", layout="wide")
+st.set_page_config(page_title="AI Doctor Assistant", page_icon="🩺", layout="wide")
 
 
 @st.cache_resource
@@ -13,103 +13,130 @@ def get_model():
     return build_model()
 
 
-def feature_names(kind):
-    return [feature for feature, details in FEATURES.items() if details["kind"] == kind]
-
-
-def feature_label(feature):
-    return FEATURES[feature]["label"]
-
-
 model = get_model()
-st.title("BioMatrix | Clinical Decision Support")
+
+
+def names(kind):
+    return [f for f, v in FEATURES.items() if v["kind"] == kind]
+
+
+def fmt(f):
+    return FEATURES[f]["label"]
+
+
+st.title("🩺 AI Doctor Assistant")
 st.warning(DISCLAIMER)
-st.caption("Educational prototype. Its probabilities come from synthetic training data and are not clinical estimates.")
 
-patient_column, assessment_column = st.columns([1, 1])
+left, right = st.columns([1, 1])
+evidence = {}
 
-with patient_column:
+with left:
     st.header("Patient findings")
-    with st.form("patient_assessment"):
-        st.subheader("Stage 1 - Symptoms")
-        symptoms_present = st.multiselect(
-            "Symptoms present", feature_names("symptom"), format_func=feature_label
-        )
-        symptoms_absent = st.multiselect(
-            "Symptoms confirmed absent",
-            [feature for feature in feature_names("symptom") if feature not in symptoms_present],
-            format_func=feature_label,
-            help="Leave unreported symptoms unselected; they remain unknown to the model.",
-        )
 
-        st.subheader("Patient factors")
-        patient_factors = st.multiselect(
-            "Factors affecting medication cautions",
-            list(PATIENT_FACTORS),
-            format_func=lambda key: PATIENT_FACTORS[key],
-        )
+    factors = st.multiselect("Patient factors (affect medicine cautions)", list(PATIENT_FACTORS),
+                             format_func=lambda k: PATIENT_FACTORS[k])
 
-        st.subheader("Stage 2 - Medication response")
-        no_response = st.checkbox(FEATURES["no_response_paracetamol"]["label"])
+    st.subheader("Stage 1 - Symptoms")
+    present = st.multiselect("Symptoms present", names("symptom"), format_func=fmt)
+    absent_options = [f for f in names("symptom") if f not in present]
+    absent = st.multiselect("Symptoms confirmed absent (optional)", absent_options, format_func=fmt)
+    evidence.update({f: True for f in present})
+    evidence.update({f: False for f in absent})
 
-        st.subheader("Stage 3 - Test results")
-        labs_positive = st.multiselect(
-            "Abnormal / positive findings", feature_names("lab"), format_func=feature_label
-        )
-        labs_negative = st.multiselect(
-            "Tests done: normal / negative",
-            [feature for feature in feature_names("lab") if feature not in labs_positive],
-            format_func=feature_label,
-        )
+    other_symptoms = st.text_area(
+        "Any other symptoms not listed above (free text - for the doctor's own reference; "
+        "not used in the probability calculation yet)",
+        placeholder="e.g. mild ear pain, occasional dizziness...")
 
-        submitted = st.form_submit_button("Run assessment", type="primary", use_container_width=True)
+    st.subheader("Stage 2 - Medication response")
+    if st.checkbox(FEATURES["no_response_paracetamol"]["label"]):
+        evidence["no_response_paracetamol"] = True
 
-    if submitted:
-        evidence = {feature: True for feature in symptoms_present + labs_positive}
-        evidence.update({feature: False for feature in symptoms_absent + labs_negative})
-        if no_response:
-            evidence["no_response_paracetamol"] = True
-        st.session_state["assessment_evidence"] = evidence
-        st.session_state["assessment_factors"] = patient_factors
+    st.subheader("Stage 3 - Occupation / place of exposure")
+    st.caption("Free to ask, no test needed - often the strongest clue for diseases like leptospirosis or typhoid.")
+    occ_pos = st.multiselect("Exposure factors present", names("occupation"), format_func=fmt)
+    occ_neg_options = [f for f in names("occupation") if f not in occ_pos]
+    occ_neg = st.multiselect("Exposure factors confirmed absent (optional)", occ_neg_options, format_func=fmt)
+    evidence.update({f: True for f in occ_pos})
+    evidence.update({f: False for f in occ_neg})
 
-with assessment_column:
+    st.subheader("Stage 4 - Exam findings + basic CBC")
+    st.caption("Bedside exam findings cost nothing; a basic CBC (platelet/WBC count) is cheap and widely available.")
+    hist_pos = st.multiselect("Exam findings present", names("history"), format_func=fmt)
+    hist_neg_options = [f for f in names("history") if f not in hist_pos]
+    hist_neg = st.multiselect("Exam findings confirmed absent (optional)", hist_neg_options, format_func=fmt)
+    evidence.update({f: True for f in hist_pos})
+    evidence.update({f: False for f in hist_neg})
+
+    cbc_pos = st.multiselect("Basic CBC: abnormal values (if already done)", names("basic_lab"), format_func=fmt)
+    cbc_neg_options = [f for f in names("basic_lab") if f not in cbc_pos]
+    cbc_neg = st.multiselect("Basic CBC: normal values", cbc_neg_options, format_func=fmt)
+    evidence.update({f: True for f in cbc_pos})
+    evidence.update({f: False for f in cbc_neg})
+
+    st.subheader("Stage 5 - Confirmatory test result")
+    lab_pos = st.multiselect("Confirmatory test: positive/abnormal", names("confirmatory_lab"), format_func=fmt)
+    lab_neg_options = [f for f in names("confirmatory_lab") if f not in lab_pos]
+    lab_neg = st.multiselect("Confirmatory test: normal/negative", lab_neg_options, format_func=fmt)
+    evidence.update({f: True for f in lab_pos})
+    evidence.update({f: False for f in lab_neg})
+
+with right:
     st.header("Assessment")
-    evidence = st.session_state.get("assessment_evidence", {})
     if not evidence:
-        st.info("Enter patient findings and run an assessment to view decision-support results.")
+        st.info("Enter symptoms on the left to see possible conditions.")
     else:
         ranked = model.ranked(evidence)
         st.subheader("Possible conditions")
-        for disease, probability in ranked:
-            st.progress(probability, text=f"{disease} · {probability:.1%}")
+        st.bar_chart({d: round(p * 100, 1) for d, p in ranked}, horizontal=True)
+        top, top_p = ranked[0]
+        st.metric("Most likely", top, f"{top_p * 100:.1f}%")
 
-        top_disease, top_probability = ranked[0]
-        st.metric("Highest model score", top_disease, f"{top_probability:.1%}")
+        for a, b, pa, pb in model.possible_coinfections(evidence, COINFECTION_PAIRS):
+            st.warning(f"**Possible co-infection:** {a} ({pa*100:.0f}%) and {b} ({pb*100:.0f}%) are "
+                       f"both still strongly possible together - consider testing for BOTH rather than "
+                       f"assuming one rules out the other.")
 
-        st.subheader("Suggested next tests")
-        lab_features = feature_names("lab")
-        suggestions = model.suggest_next(evidence, lab_features, top_k=3)
-        if suggestions:
-            for feature, information_gain in suggestions:
-                st.write(f"- **{feature_label(feature)}** (information gain: {information_gain:.2f} bits)")
-        else:
-            st.info("All available test findings have already been entered.")
+        if other_symptoms.strip():
+            st.caption(f"Doctor's free-text note (not yet scored by the model): \"{other_symptoms.strip()}\"")
 
-        st.subheader(f"Evidence affecting {top_disease}")
-        for feature, score in model.explain(evidence, top_disease)[:6]:
-            direction = "supports" if score > 0 else "argues against"
-            state = "present" if evidence[feature] else "absent"
-            st.write(f"- {feature_label(feature)} ({state}) {direction} this model result ({score:+.2f})")
+        unanswered_occ = [f for f in names("occupation") if f not in evidence]
+        if unanswered_occ:
+            st.subheader("Most useful exposure questions to ask right now (free)")
+            for f, gain in model.suggest_next(evidence, unanswered_occ, top_k=3):
+                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
 
-        st.subheader("Medication reference for clinician review")
-        selected_disease = st.selectbox("Reference condition", [disease for disease, _ in ranked])
-        plan = get_plan(selected_disease, st.session_state.get("assessment_factors", []))
+        unanswered_history = [f for f in names("history") if f not in evidence]
+        if unanswered_history:
+            st.subheader("Most useful exam findings to check right now (free)")
+            for f, gain in model.suggest_next(evidence, unanswered_history, top_k=3):
+                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+
+        unanswered_cbc = [f for f in names("basic_lab") if f not in evidence]
+        if unanswered_cbc:
+            st.subheader("Basic CBC values worth checking (cheap, widely available)")
+            for f, gain in model.suggest_next(evidence, unanswered_cbc, top_k=3):
+                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+
+        confirmatory = [f for f in names("confirmatory_lab")]
+        st.subheader("Suggested confirmatory test")
+        for f, gain in model.suggest_next(evidence, confirmatory, top_k=3):
+            st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+
+        st.subheader(f"Why {top}?")
+        for f, score in model.explain(evidence, top)[:6]:
+            icon = "🟢" if score > 0 else "🔴"
+            state = "present" if evidence[f] else "absent"
+            st.write(f"{icon} {fmt(f)} ({state}): {score:+.2f}")
+
+        st.subheader("Medication reference (for doctor review)")
+        chosen = st.selectbox("Show plan for", [d for d, _ in ranked], index=0)
+        plan = get_plan(chosen, factors)
         st.write(plan["summary"])
-        for medicine in plan["medicines"]:
-            st.markdown(f"**{medicine['name']}** - {medicine['purpose']}")
-            st.caption(medicine["notes"])
-            for warning in medicine["warnings"]:
-                st.warning(warning)
+        for m in plan["medicines"]:
+            st.markdown(f"**{m['name']}** - {m['purpose']}. {m['notes']}")
+            for w in m["warnings"]:
+                st.warning(w)
         st.markdown("**Avoid:** " + "; ".join(plan["avoid"]))
         st.markdown("**Monitor:** " + "; ".join(plan["monitor"]))
-        st.error("Urgent clinical review if: " + "; ".join(plan["red_flags"]))
+        st.error("Urgent review if: " + "; ".join(plan["red_flags"]))

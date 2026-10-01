@@ -175,6 +175,24 @@ MEDICATIONS = {
         "red_flags": ["Signs of severe dehydration (very dry mouth, sunken eyes, no urine)", "Blood in stool",
                       "High fever", "Lethargy or drowsiness", "Diarrhoea lasting more than a few days"],
     },
+
+    "Leptospirosis": {
+        "summary": "Prompt clinician assessment is important after compatible exposure; treatment depends on severity and local guidance.",
+        "medicines": [
+            {"name": "Clinician-directed antibiotics", "purpose": "Treat suspected or confirmed infection",
+             "notes": "Choice and route depend on severity; severe illness needs hospital care.",
+             "caution_if": {"pregnancy": "Antibiotic choice requires clinician review.",
+                            "penicillin_allergy": "Select an appropriate alternative if allergy is significant.",
+                            "kidney_disease": "Review kidney function and dosing."}},
+            {"name": "Supportive care", "purpose": "Maintain hydration and monitor organ function",
+             "notes": "Medical supervision is important if kidney, liver, lung, or bleeding complications are suspected.",
+             "caution_if": {"kidney_disease": "Fluid management requires clinician supervision.",
+                            "liver_disease": "Monitor liver function."}},
+        ],
+        "avoid": ["Self-starting antibiotics", "Delaying urgent review when jaundice, reduced urine, or breathlessness occurs"],
+        "monitor": ["Kidney and liver function", "Urine output", "Breathing and bleeding symptoms"],
+        "red_flags": ["Jaundice", "Reduced urine output", "Breathlessness", "Confusion", "Bleeding"],
+    },
 }
 
 
