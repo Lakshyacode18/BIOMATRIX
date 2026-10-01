@@ -39,6 +39,10 @@ with st.expander("About this prototype"):
     st.markdown("**Conditions covered:** " + ", ".join(DISEASES))
     st.markdown("**Assumed setting:** Indian outpatient fever workup.")
     st.markdown(
+        "**Prior assumptions:** The starting disease priors are illustrative, not local prevalence "
+        "estimates; actual rates vary by season, region, and clinic type."
+    )
+    st.markdown(
         "**Main limitation:** The model treats symptoms as independent of one another, "
         "which is a simplifying assumption and may not reflect clinical relationships."
     )

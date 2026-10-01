@@ -11,7 +11,8 @@ reviewed by qualified doctors.
 DISEASES = ["Viral fever", "Dengue", "Typhoid", "Malaria",
             "Pneumonia", "UTI", "Gastroenteritis", "Leptospirosis"]
 
-# Rough share of each disease among patients who walk in with an illness.
+# Illustrative prior assumptions for an Indian outpatient fever workup only.
+# These are not prevalence estimates; actual priors vary by season, region, and clinic type.
 PRIORS = [0.33, 0.10, 0.08, 0.07, 0.10, 0.12, 0.17, 0.03]  # Leptospirosis kept low: real but less common than dengue/typhoid
 
 # feature name -> kind, human label, P(feature present | disease) per disease
@@ -37,12 +38,14 @@ FEATURES = {
     "bleeding_gums_nosebleed": {"kind": "symptom", "label": "Bleeding gums or nosebleed",
                                  "p": [.02, .35, .05, .05, .02, .01, .02, 0.10]},
     "relative_bradycardia":   {"kind": "symptom", "label": "Pulse slower than expected for the fever (relative bradycardia)",
+                                # Clinician review requested; validate this illustrative Typhoid value.
                                 "p": [.05, .05, .55, .05, .03, .02, .02, 0.05]},
     "rose_spots":             {"kind": "symptom", "label": "Rose-coloured skin spots on abdomen/chest",
                                 "p": [.01, .02, .20, .01, .01, .01, .01, 0.01]},
     # ---- medication response ----
     "no_response_paracetamol": {"kind": "medication",
                                 "label": "Fever persisted after 2-3 days of paracetamol",
+                                # Clinician review requested; antipyretic response may not discriminate well.
                                 "p": [.15, .70, .80, .75, .70, .50, .20, 0.75]},
     # ---- lab / test findings ----
     "low_platelets":      {"kind": "basic_lab", "label": "Low platelet count (from CBC)",       "p": [.05, .85, .15, .70, .05, .03, .03, 0.35]},
