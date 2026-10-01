@@ -118,3 +118,22 @@ TREATMENT_NOTES = {
 DISCLAIMER = ("Decision-support prototype trained on SYNTHETIC data. Not a medical device. "
               "Intended for use by qualified doctors. Final diagnosis and treatment must be made "
               "by a qualified doctor. No patient data is stored.")
+
+
+def validate_knowledge():
+    assert len(DISEASES) == len(PRIORS), "PRIORS must match DISEASES"
+    assert set(DISEASES) == set(PRIORS), "PRIORS keys must match DISEASES"
+    for disease, prior in PRIORS.items():
+        assert 0 <= prior <= 1, f"{disease}: prior {prior} is not between 0 and 1"
+
+    for name, feature in FEATURES.items():
+        missing = set(DISEASES) - set(feature["p"])
+        extra = set(feature["p"]) - set(DISEASES)
+        assert not missing and not extra, f"{name}: missing {missing}, unknown {extra}"
+        for disease, probability in feature["p"].items():
+            assert 0 <= probability <= 1, (
+                f"{name}/{disease}: probability {probability} is not between 0 and 1"
+            )
+
+
+validate_knowledge()
