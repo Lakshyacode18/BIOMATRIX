@@ -105,9 +105,26 @@ class NaiveBayesDiagnoser:
         return found
 
 
-def build_model(n=6000, seed=42):
-    rows = generate(n, seed)
-    return NaiveBayesDiagnoser().fit(rows, FEATURES.keys())
+def build_model():
+    """Build the model straight from knowledge.py."""
+    from knowledge import DISEASES, PRIORS
+
+    model = NaiveBayesDiagnoser()
+    model.features = list(FEATURES)
+    model.classes = list(DISEASES)
+    total = sum(PRIORS.values())
+    model.log_prior = {
+        disease: math.log(PRIORS[disease] / total)
+        for disease in DISEASES
+    }
+    model.p = {
+        disease: {
+            feature: min(max(FEATURES[feature]["p"][disease], 0.005), 0.995)
+            for feature in FEATURES
+        }
+        for disease in DISEASES
+    }
+    return model
 
 
 def evaluate(model, n=3000, seed=7):
