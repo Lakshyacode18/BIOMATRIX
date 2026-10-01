@@ -1,7 +1,7 @@
 """Streamlit web UI:  streamlit run app.py"""
 import streamlit as st
 
-from knowledge import COINFECTION_PAIRS, DISCLAIMER, FEATURES
+from knowledge import COINFECTION_PAIRS, DISCLAIMER, DISEASES, FEATURES
 from model import build_model
 
 SHOW_MEDICATIONS = False
@@ -34,6 +34,18 @@ def fmt(f):
 
 st.title("Bio Matrix: Clinical Decision Support (Prototype v0.1)")
 st.warning(DISCLAIMER)
+
+with st.expander("About this prototype"):
+    st.markdown("**Conditions covered:** " + ", ".join(DISEASES))
+    st.markdown("**Assumed setting:** Indian outpatient fever workup.")
+    st.markdown(
+        "**Main limitation:** The model treats symptoms as independent of one another, "
+        "which is a simplifying assumption and may not reflect clinical relationships."
+    )
+    st.markdown(
+        "**Advisor review pending:** Should Leptospirosis-Dengue be included as a possible "
+        "co-infection pair? Reported overlap and co-infections exist, but the pair is not flagged here."
+    )
 
 left, right = st.columns([1, 1])
 evidence = {}
@@ -118,9 +130,11 @@ with right:
         )
 
         for a, b, pa, pb in model.possible_coinfections(evidence, COINFECTION_PAIRS):
-            st.warning(f"**Possible co-infection:** {a} ({pa*100:.0f}%) and {b} ({pb*100:.0f}%) are "
-                       f"both still strongly possible together - consider testing for BOTH rather than "
-                       f"assuming one rules out the other.")
+            st.warning(
+                f"Possible co-infection: {a} ({pa*100:.0f}%) and {b} ({pb*100:.0f}%) "
+                "remain plausible together. This may warrant considering testing for both, "
+                "at the doctor's discretion."
+            )
 
         if other_symptoms.strip():
             st.caption(f"Doctor's free-text note (not yet scored by the model): \"{other_symptoms.strip()}\"")

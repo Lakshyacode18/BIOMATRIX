@@ -81,8 +81,14 @@ FEATURES = {
                                "p": [.10, .15, .10, .20, .05, .03, .05, .45]},
 }
 
-# Disease pairs that are clinically documented to occur together often enough
-# that the model should flag possible co-infection instead of forcing one answer.
+# Reported co-infections; these citations document reports, not model validity:
+# - Dengue and enteric fever in North India: https://pubmed.ncbi.nlm.nih.gov/25653945/
+# - Malaria and enteric fever in North India: https://pubmed.ncbi.nlm.nih.gov/24995183/
+# - Adult malaria co-infections in Eastern India: https://pubmed.ncbi.nlm.nih.gov/35910822/
+# Advisor review pending: should Leptospirosis-Dengue be flagged as a pair?
+# Their overlapping presentation and co-infection reports are discussed at:
+# https://pubmed.ncbi.nlm.nih.gov/39856559/ and https://pubmed.ncbi.nlm.nih.gov/30483374/
+# Do not add that pair until a qualified advisor reviews its appropriateness.
 COINFECTION_PAIRS = [("Dengue", "Typhoid"), ("Typhoid", "Malaria")]
 
 # General, well-known supportive/treatment approaches shown for the DOCTOR to consider.
@@ -98,6 +104,6 @@ TREATMENT_NOTES = {
     "Leptospirosis": "Early antibiotics (e.g. doxycycline for mild cases, IV penicillin/ceftriaxone for severe) plus supportive care; monitor kidney and liver function.",
 }
 
-# Symptom combinations that should always prompt urgent clinical review.
 DISCLAIMER = ("Decision-support prototype trained on SYNTHETIC data. Not a medical device. "
-              "Final diagnosis and treatment must be made by a qualified doctor.")
+              "Intended for use by qualified doctors. Final diagnosis and treatment must be made "
+              "by a qualified doctor. No patient data is stored.")
