@@ -9,10 +9,10 @@ def generate(n=6000, seed=42):
     rng = random.Random(seed)
     rows = []
     for _ in range(n):
-        disease = rng.choices(DISEASES, weights=[PRIORS[name] for name in DISEASES])[0]
-        row = {"disease": disease}
+        d = rng.choices(range(len(DISEASES)), weights=[PRIORS[name] for name in DISEASES])[0]
+        row = {"disease": DISEASES[d]}
         for name, f in FEATURES.items():
-            row[name] = 1 if rng.random() < f["p"][disease] else 0
+            row[name] = 1 if rng.random() < f["p"][DISEASES[d]] else 0
         rows.append(row)
     return rows
 
