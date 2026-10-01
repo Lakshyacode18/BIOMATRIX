@@ -30,12 +30,12 @@ def generate_review_sheet(path="review_sheet.csv"):
             "comment",
         ])
 
-        for disease_index, disease in enumerate(DISEASES):
+        for disease in DISEASES:
             writer.writerow([
                 disease,
                 "Assumed disease prior",
                 "prior",
-                PRIORS[disease_index],
+            PRIORS[disease],
                 "",
                 "",
                 REVIEW_NOTES["__prior__"],
@@ -46,7 +46,7 @@ def generate_review_sheet(path="review_sheet.csv"):
                     disease,
                     details["label"],
                     details["kind"],
-                    details["p"][disease_index],
+                    details["p"][disease],
                     "",
                     "",
                     REVIEW_NOTES.get(feature, ""),

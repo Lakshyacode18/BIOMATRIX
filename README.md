@@ -2,6 +2,8 @@
 
 Bio Matrix is a Streamlit clinical decision-support prototype using a synthetic patient-data generator, Naive Bayes model, and knowledge base. Medication guidance is disabled in the product UI by default.
 
+In `knowledge.py`, disease priors and each feature's conditional probabilities are keyed by disease name, so changing disease order cannot silently remap probability values.
+
 ## Run locally
 
 ```powershell

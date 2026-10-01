@@ -7,81 +7,89 @@ statistics. Before any real use they must be replaced with data/guidelines
 reviewed by qualified doctors.
 """
 
-# Order matters: every probability list below follows this disease order.
+# Disease names are the keys used by priors and feature probabilities below.
 DISEASES = ["Viral fever", "Dengue", "Typhoid", "Malaria",
             "Pneumonia", "UTI", "Gastroenteritis", "Leptospirosis"]
 
 # Illustrative prior assumptions for an Indian outpatient fever workup only.
 # These are not prevalence estimates; actual priors vary by season, region, and clinic type.
-PRIORS = [0.33, 0.10, 0.08, 0.07, 0.10, 0.12, 0.17, 0.03]  # Leptospirosis kept low: real but less common than dengue/typhoid
+PRIORS = {
+    "Viral fever": 0.33,
+    "Dengue": 0.10,
+    "Typhoid": 0.08,
+    "Malaria": 0.07,
+    "Pneumonia": 0.10,
+    "UTI": 0.12,
+    "Gastroenteritis": 0.17,
+    "Leptospirosis": 0.03,
+}
 
-# feature name -> kind, human label, P(feature present | disease) per disease
-#                                Viral Dengue Typhoid Malaria Pneum UTI  Gastro
+# Feature probabilities are keyed by disease so changing disease order is safe.
 FEATURES = {
     # ---- symptoms ----
-    "fever":              {"kind": "symptom", "label": "Fever",                      "p": [.90, .98, .95, .98, .85, .40, .30, 0.95]},
-    "headache":           {"kind": "symptom", "label": "Headache",                   "p": [.50, .80, .55, .70, .25, .10, .15, 0.7]},
-    "body_pain":          {"kind": "symptom", "label": "Body pain / myalgia",        "p": [.55, .90, .50, .70, .30, .10, .20, 0.85]},
-    "chills":             {"kind": "symptom", "label": "Chills / rigors",            "p": [.30, .40, .40, .90, .30, .20, .05, 0.45]},
-    "cough":              {"kind": "symptom", "label": "Cough",                      "p": [.45, .10, .15, .05, .90, .03, .03, 0.05]},
-    "sore_throat":        {"kind": "symptom", "label": "Sore throat",                "p": [.55, .05, .10, .03, .15, .02, .03, 0.05]},
-    "runny_nose":         {"kind": "symptom", "label": "Runny nose",                 "p": [.55, .05, .05, .03, .20, .02, .03, 0.03]},
-    "breathlessness":     {"kind": "symptom", "label": "Breathlessness",             "p": [.03, .05, .05, .05, .60, .02, .03, 0.1]},
-    "vomiting":           {"kind": "symptom", "label": "Vomiting",                   "p": [.15, .45, .40, .35, .10, .15, .75, 0.35]},
-    "diarrhea":           {"kind": "symptom", "label": "Diarrhea",                   "p": [.10, .15, .35, .10, .05, .03, .85, 0.1]},
-    "abdominal_pain":     {"kind": "symptom", "label": "Abdominal pain",             "p": [.10, .40, .55, .15, .05, .35, .60, 0.15]},
-    "rash":               {"kind": "symptom", "label": "Skin rash",                  "p": [.05, .40, .15, .03, .02, .02, .02, 0.05]},
-    "joint_pain":         {"kind": "symptom", "label": "Joint pain",                 "p": [.25, .70, .15, .30, .05, .03, .05, 0.3]},
-    "retro_orbital_pain": {"kind": "symptom", "label": "Pain behind the eyes",       "p": [.05, .55, .03, .05, .02, .01, .02, 0.05]},
-    "burning_urination":  {"kind": "symptom", "label": "Burning urination",          "p": [.02, .02, .02, .02, .02, .95, .02, 0.03]},
-    "fatigue":            {"kind": "symptom", "label": "Fatigue / weakness",         "p": [.50, .85, .75, .75, .60, .35, .50, 0.8]},
+    "fever": {"kind": "symptom", "label": "Fever", "p": {"Viral fever": .90, "Dengue": .98, "Typhoid": .95, "Malaria": .98, "Pneumonia": .85, "UTI": .40, "Gastroenteritis": .30, "Leptospirosis": .95}},
+    "headache": {"kind": "symptom", "label": "Headache", "p": {"Viral fever": .50, "Dengue": .80, "Typhoid": .55, "Malaria": .70, "Pneumonia": .25, "UTI": .10, "Gastroenteritis": .15, "Leptospirosis": .70}},
+    "body_pain": {"kind": "symptom", "label": "Body pain / myalgia", "p": {"Viral fever": .55, "Dengue": .90, "Typhoid": .50, "Malaria": .70, "Pneumonia": .30, "UTI": .10, "Gastroenteritis": .20, "Leptospirosis": .85}},
+    "chills": {"kind": "symptom", "label": "Chills / rigors", "p": {"Viral fever": .30, "Dengue": .40, "Typhoid": .40, "Malaria": .90, "Pneumonia": .30, "UTI": .20, "Gastroenteritis": .05, "Leptospirosis": .45}},
+    "cough": {"kind": "symptom", "label": "Cough", "p": {"Viral fever": .45, "Dengue": .10, "Typhoid": .15, "Malaria": .05, "Pneumonia": .90, "UTI": .03, "Gastroenteritis": .03, "Leptospirosis": .05}},
+    "sore_throat": {"kind": "symptom", "label": "Sore throat", "p": {"Viral fever": .55, "Dengue": .05, "Typhoid": .10, "Malaria": .03, "Pneumonia": .15, "UTI": .02, "Gastroenteritis": .03, "Leptospirosis": .05}},
+    "runny_nose": {"kind": "symptom", "label": "Runny nose", "p": {"Viral fever": .55, "Dengue": .05, "Typhoid": .05, "Malaria": .03, "Pneumonia": .20, "UTI": .02, "Gastroenteritis": .03, "Leptospirosis": .03}},
+    "breathlessness": {"kind": "symptom", "label": "Breathlessness", "p": {"Viral fever": .03, "Dengue": .05, "Typhoid": .05, "Malaria": .05, "Pneumonia": .60, "UTI": .02, "Gastroenteritis": .03, "Leptospirosis": .10}},
+    "vomiting": {"kind": "symptom", "label": "Vomiting", "p": {"Viral fever": .15, "Dengue": .45, "Typhoid": .40, "Malaria": .35, "Pneumonia": .10, "UTI": .15, "Gastroenteritis": .75, "Leptospirosis": .35}},
+    "diarrhea": {"kind": "symptom", "label": "Diarrhea", "p": {"Viral fever": .10, "Dengue": .15, "Typhoid": .35, "Malaria": .10, "Pneumonia": .05, "UTI": .03, "Gastroenteritis": .85, "Leptospirosis": .10}},
+    "abdominal_pain": {"kind": "symptom", "label": "Abdominal pain", "p": {"Viral fever": .10, "Dengue": .40, "Typhoid": .55, "Malaria": .15, "Pneumonia": .05, "UTI": .35, "Gastroenteritis": .60, "Leptospirosis": .15}},
+    "rash": {"kind": "symptom", "label": "Skin rash", "p": {"Viral fever": .05, "Dengue": .40, "Typhoid": .15, "Malaria": .03, "Pneumonia": .02, "UTI": .02, "Gastroenteritis": .02, "Leptospirosis": .05}},
+    "joint_pain": {"kind": "symptom", "label": "Joint pain", "p": {"Viral fever": .25, "Dengue": .70, "Typhoid": .15, "Malaria": .30, "Pneumonia": .05, "UTI": .03, "Gastroenteritis": .05, "Leptospirosis": .30}},
+    "retro_orbital_pain": {"kind": "symptom", "label": "Pain behind the eyes", "p": {"Viral fever": .05, "Dengue": .55, "Typhoid": .03, "Malaria": .05, "Pneumonia": .02, "UTI": .01, "Gastroenteritis": .02, "Leptospirosis": .05}},
+    "burning_urination": {"kind": "symptom", "label": "Burning urination", "p": {"Viral fever": .02, "Dengue": .02, "Typhoid": .02, "Malaria": .02, "Pneumonia": .02, "UTI": .95, "Gastroenteritis": .02, "Leptospirosis": .03}},
+    "fatigue": {"kind": "symptom", "label": "Fatigue / weakness", "p": {"Viral fever": .50, "Dengue": .85, "Typhoid": .75, "Malaria": .75, "Pneumonia": .60, "UTI": .35, "Gastroenteritis": .50, "Leptospirosis": .80}},
     "bleeding_gums_nosebleed": {"kind": "symptom", "label": "Bleeding gums or nosebleed",
-                                 "p": [.02, .35, .05, .05, .02, .01, .02, 0.10]},
+                                 "p": {"Viral fever": .02, "Dengue": .35, "Typhoid": .05, "Malaria": .05, "Pneumonia": .02, "UTI": .01, "Gastroenteritis": .02, "Leptospirosis": .10}},
     "relative_bradycardia":   {"kind": "symptom", "label": "Pulse slower than expected for the fever (relative bradycardia)",
                                 # Clinician review requested; validate this illustrative Typhoid value.
-                                "p": [.05, .05, .55, .05, .03, .02, .02, 0.05]},
+                                "p": {"Viral fever": .05, "Dengue": .05, "Typhoid": .55, "Malaria": .05, "Pneumonia": .03, "UTI": .02, "Gastroenteritis": .02, "Leptospirosis": .05}},
     "rose_spots":             {"kind": "symptom", "label": "Rose-coloured skin spots on abdomen/chest",
-                                "p": [.01, .02, .20, .01, .01, .01, .01, 0.01]},
+                                "p": {"Viral fever": .01, "Dengue": .02, "Typhoid": .20, "Malaria": .01, "Pneumonia": .01, "UTI": .01, "Gastroenteritis": .01, "Leptospirosis": .01}},
     # ---- medication response ----
     "no_response_paracetamol": {"kind": "medication",
                                 "label": "Fever persisted after 2-3 days of paracetamol",
                                 # Clinician review requested; antipyretic response may not discriminate well.
-                                "p": [.15, .70, .80, .75, .70, .50, .20, 0.75]},
+                                          "p": {"Viral fever": .15, "Dengue": .70, "Typhoid": .80, "Malaria": .75, "Pneumonia": .70, "UTI": .50, "Gastroenteritis": .20, "Leptospirosis": .75}},
     # ---- lab / test findings ----
-    "low_platelets":      {"kind": "basic_lab", "label": "Low platelet count (from CBC)",       "p": [.05, .85, .15, .70, .05, .03, .03, 0.35]},
-    "high_wbc":           {"kind": "basic_lab", "label": "High WBC count (from CBC)",           "p": [.10, .03, .10, .10, .75, .55, .15, 0.4]},
-    "low_wbc":            {"kind": "basic_lab", "label": "Low WBC count (from CBC)",            "p": [.15, .60, .30, .15, .03, .02, .03, 0.05]},
-    "ns1_positive":       {"kind": "confirmatory_lab", "label": "Dengue NS1 antigen positive",    "p": [.01, .80, .01, .01, .01, .01, .01, 0.01]},
-    "widal_positive":     {"kind": "confirmatory_lab", "label": "Widal / typhoid test positive",  "p": [.03, .03, .70, .03, .02, .02, .02, 0.03]},
+     "low_platelets": {"kind": "basic_lab", "label": "Low platelet count (from CBC)", "p": {"Viral fever": .05, "Dengue": .85, "Typhoid": .15, "Malaria": .70, "Pneumonia": .05, "UTI": .03, "Gastroenteritis": .03, "Leptospirosis": .35}},
+     "high_wbc": {"kind": "basic_lab", "label": "High WBC count (from CBC)", "p": {"Viral fever": .10, "Dengue": .03, "Typhoid": .10, "Malaria": .10, "Pneumonia": .75, "UTI": .55, "Gastroenteritis": .15, "Leptospirosis": .40}},
+     "low_wbc": {"kind": "basic_lab", "label": "Low WBC count (from CBC)", "p": {"Viral fever": .15, "Dengue": .60, "Typhoid": .30, "Malaria": .15, "Pneumonia": .03, "UTI": .02, "Gastroenteritis": .03, "Leptospirosis": .05}},
+     "ns1_positive": {"kind": "confirmatory_lab", "label": "Dengue NS1 antigen positive", "p": {"Viral fever": .01, "Dengue": .80, "Typhoid": .01, "Malaria": .01, "Pneumonia": .01, "UTI": .01, "Gastroenteritis": .01, "Leptospirosis": .01}},
+     "widal_positive": {"kind": "confirmatory_lab", "label": "Widal / typhoid test positive", "p": {"Viral fever": .03, "Dengue": .03, "Typhoid": .70, "Malaria": .03, "Pneumonia": .02, "UTI": .02, "Gastroenteritis": .02, "Leptospirosis": .03}},
     "malaria_parasite_positive": {"kind": "confirmatory_lab", "label": "Malaria parasite test positive",
-                                  "p": [.01, .01, .01, .85, .01, .01, .01, 0.01]},
-    "urine_pus_cells_high": {"kind": "confirmatory_lab", "label": "Pus cells high in urine test", "p": [.03, .03, .03, .03, .03, .90, .03, 0.03]},
-    "chest_xray_infiltrate": {"kind": "confirmatory_lab", "label": "Chest X-ray shows infiltrate", "p": [.02, .01, .01, .01, .85, .01, .01, 0.02]},
+                                             "p": {"Viral fever": .01, "Dengue": .01, "Typhoid": .01, "Malaria": .85, "Pneumonia": .01, "UTI": .01, "Gastroenteritis": .01, "Leptospirosis": .01}},
+     "urine_pus_cells_high": {"kind": "confirmatory_lab", "label": "Pus cells high in urine test", "p": {"Viral fever": .03, "Dengue": .03, "Typhoid": .03, "Malaria": .03, "Pneumonia": .03, "UTI": .90, "Gastroenteritis": .03, "Leptospirosis": .03}},
+     "chest_xray_infiltrate": {"kind": "confirmatory_lab", "label": "Chest X-ray shows infiltrate", "p": {"Viral fever": .02, "Dengue": .01, "Typhoid": .01, "Malaria": .01, "Pneumonia": .85, "UTI": .01, "Gastroenteritis": .01, "Leptospirosis": .02}},
     "leptospirosis_igm_positive": {"kind": "confirmatory_lab", "label": "Leptospirosis IgM ELISA / MAT positive",
-                                   "p": [.01, .01, .01, .01, .01, .01, .01, .80]},
+                                              "p": {"Viral fever": .01, "Dengue": .01, "Typhoid": .01, "Malaria": .01, "Pneumonia": .01, "UTI": .01, "Gastroenteritis": .01, "Leptospirosis": .80}},
     # ---- occupation / place exposure (ask directly - no test needed) ----
     "farm_fieldwork":         {"kind": "occupation", "label": "Works in farming / fieldwork",
-                                "p": [.05, .05, .08, .10, .03, .02, .05, .55]},
+                                                                "p": {"Viral fever": .05, "Dengue": .05, "Typhoid": .08, "Malaria": .10, "Pneumonia": .03, "UTI": .02, "Gastroenteritis": .05, "Leptospirosis": .55}},
     "animal_rodent_contact":  {"kind": "occupation", "label": "Regular contact with rodents / cattle / other animals",
-                                "p": [.03, .03, .05, .05, .02, .01, .03, .60]},
+                                                                "p": {"Viral fever": .03, "Dengue": .03, "Typhoid": .05, "Malaria": .05, "Pneumonia": .02, "UTI": .01, "Gastroenteritis": .03, "Leptospirosis": .60}},
     "sewage_sanitation_work": {"kind": "occupation", "label": "Works in sewage / sanitation / waste handling",
-                                "p": [.03, .03, .25, .05, .02, .02, .10, .55]},
+                                                                "p": {"Viral fever": .03, "Dengue": .03, "Typhoid": .25, "Malaria": .05, "Pneumonia": .02, "UTI": .02, "Gastroenteritis": .10, "Leptospirosis": .55}},
     "water_body_contact":     {"kind": "occupation", "label": "Recent wading/swimming in ponds, rivers, or stagnant water",
-                                "p": [.05, .15, .05, .20, .02, .02, .05, .55]},
+                                                                "p": {"Viral fever": .05, "Dengue": .15, "Typhoid": .05, "Malaria": .20, "Pneumonia": .02, "UTI": .02, "Gastroenteritis": .05, "Leptospirosis": .55}},
     "flood_affected_residence": {"kind": "occupation", "label": "Lives in / recently visited a flood-affected area",
-                                  "p": [.05, .20, .08, .20, .03, .02, .05, .65]},
+                                                                    "p": {"Viral fever": .05, "Dengue": .20, "Typhoid": .08, "Malaria": .20, "Pneumonia": .03, "UTI": .02, "Gastroenteritis": .05, "Leptospirosis": .65}},
 
     # ---- history / exam findings (no lab needed) ----
     "calf_tenderness":       {"kind": "history", "label": "Calf muscle tenderness on pressing",
-                               "p": [.02, .05, .03, .05, .01, .01, .02, .65]},
+                               "p": {"Viral fever": .02, "Dengue": .05, "Typhoid": .03, "Malaria": .05, "Pneumonia": .01, "UTI": .01, "Gastroenteritis": .02, "Leptospirosis": .65}},
     "conjunctival_redness":  {"kind": "history", "label": "Eye redness without discharge (conjunctival suffusion)",
-                               "p": [.03, .05, .02, .03, .02, .01, .02, .55]},
+                               "p": {"Viral fever": .03, "Dengue": .05, "Typhoid": .02, "Malaria": .03, "Pneumonia": .02, "UTI": .01, "Gastroenteritis": .02, "Leptospirosis": .55}},
     "jaundice":              {"kind": "history", "label": "Yellowing of skin or eyes (jaundice)",
-                               "p": [.02, .03, .05, .05, .02, .01, .02, .40]},
+                               "p": {"Viral fever": .02, "Dengue": .03, "Typhoid": .05, "Malaria": .05, "Pneumonia": .02, "UTI": .01, "Gastroenteritis": .02, "Leptospirosis": .40}},
     "reduced_urine_output":  {"kind": "history", "label": "Reduced urine output",
-                               "p": [.02, .05, .03, .05, .03, .05, .03, .35]},
+                               "p": {"Viral fever": .02, "Dengue": .05, "Typhoid": .03, "Malaria": .05, "Pneumonia": .03, "UTI": .05, "Gastroenteritis": .03, "Leptospirosis": .35}},
     "biphasic_fever":        {"kind": "history", "label": "Fever improved then returned after a few days",
-                               "p": [.10, .15, .10, .20, .05, .03, .05, .45]},
+                               "p": {"Viral fever": .10, "Dengue": .15, "Typhoid": .10, "Malaria": .20, "Pneumonia": .05, "UTI": .03, "Gastroenteritis": .05, "Leptospirosis": .45}},
 }
 
 # Reported co-infections; these citations document reports, not model validity:
