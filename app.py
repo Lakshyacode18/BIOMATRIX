@@ -188,5 +188,9 @@ with right:
             st.error("Urgent review if: " + "; ".join(plan["red_flags"]))
 
 st.divider()
-st.caption("Bio Matrix prototype v0.1 · Oct 2026 · No patient data is stored.")
-st.link_button("Report a wrong result / give feedback", "https://forms.gle/YOUR_LINK")
+st.link_button(
+    "Report a wrong result / give feedback",
+    "https://docs.google.com/forms/d/e/1FAIpQLSdKD13WL52CB_nEwNWu-oObhcScoUJFhO-WhGf-wwjsjBZt1g/viewform",
+)
+st.caption("Bio Matrix prototype v0.1 · Oct 2026 · No patient data is stored. "
+           "Decision support for qualified doctors only.")
