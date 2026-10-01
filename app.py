@@ -99,6 +99,9 @@ with right:
     if not evidence:
         st.info("Enter symptoms on the left to see possible conditions.")
     else:
+        if sum(1 for value in evidence.values() if value) < 3:
+            st.info("Very few findings entered. The ranking is unreliable until more are added.")
+
         ranked = model.ranked(evidence)
         st.subheader("Possible conditions")
         st.bar_chart({d: round(p * 100, 1) for d, p in ranked}, horizontal=True)
@@ -122,28 +125,30 @@ with right:
         if other_symptoms.strip():
             st.caption(f"Doctor's free-text note (not yet scored by the model): \"{other_symptoms.strip()}\"")
 
+        st.caption("Listed in order of how well each helps separate the leading possibilities.")
+
         unanswered_occ = [f for f in names("occupation") if f not in evidence]
         if unanswered_occ:
             st.subheader("Most useful exposure questions to ask right now (free)")
-            for f, gain in model.suggest_next(evidence, unanswered_occ, top_k=3):
-                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+            for feature, _ in model.suggest_next(evidence, unanswered_occ, top_k=3):
+                st.write(f"- **{fmt(feature)}**")
 
         unanswered_history = [f for f in names("history") if f not in evidence]
         if unanswered_history:
             st.subheader("Most useful exam findings to check right now (free)")
-            for f, gain in model.suggest_next(evidence, unanswered_history, top_k=3):
-                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+            for feature, _ in model.suggest_next(evidence, unanswered_history, top_k=3):
+                st.write(f"- **{fmt(feature)}**")
 
         unanswered_cbc = [f for f in names("basic_lab") if f not in evidence]
         if unanswered_cbc:
             st.subheader("Basic CBC values worth checking (cheap, widely available)")
-            for f, gain in model.suggest_next(evidence, unanswered_cbc, top_k=3):
-                st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+            for feature, _ in model.suggest_next(evidence, unanswered_cbc, top_k=3):
+                st.write(f"- **{fmt(feature)}**")
 
         confirmatory = [f for f in names("confirmatory_lab")]
         st.subheader("Suggested confirmatory test")
-        for f, gain in model.suggest_next(evidence, confirmatory, top_k=3):
-            st.write(f"- **{fmt(f)}**  (information gain {gain:.2f} bits)")
+        for feature, _ in model.suggest_next(evidence, confirmatory, top_k=3):
+            st.write(f"- **{fmt(feature)}**")
 
         st.subheader(f"Why {top}?")
         for f, score in model.explain(evidence, top)[:6]:
