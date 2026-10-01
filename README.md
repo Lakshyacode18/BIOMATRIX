@@ -33,3 +33,17 @@ python generate_review_sheet.py
 ```
 
 The worksheet leaves doctor values and sources blank for qualified review. The rows for paracetamol response, relative bradycardia, and disease priors include review prompts; do not replace the current illustrative values without qualified review and cited sources.
+
+## Evaluate published cases
+
+Use `evaluate_cases.py` to compare the model with published, de-identified cases. Do not enter patient identifiers. Record case findings and confirmed diagnoses from the source before looking at model output, and do not tune model values against cases that you report as evaluation results.
+
+```powershell
+python evaluate_cases.py --template
+python evaluate_cases.py --features
+python evaluate_cases.py cases.csv
+```
+
+The template's `EXAMPLE` rows are fabricated and are automatically excluded; delete or replace them. Case files use `case_id`, `source`, `confirmed_diagnosis`, and semicolon-separated `findings`. Prefix documented-absent findings with `-`, for example `fever; headache; -cough`. Unknown findings and contradictory entries are reported and skipped. Diagnoses outside the eight modeled conditions are reported but not scored.
+
+The tool writes per-case results to `case_results.csv`. These results describe only the supplied cases and are not estimates of general clinical accuracy. Keep case datasets and results local unless you have permission to share them; CSV files are ignored by Git by default.
