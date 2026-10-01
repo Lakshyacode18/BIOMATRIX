@@ -57,8 +57,8 @@ with left:
     evidence.update({f: False for f in absent})
 
     other_symptoms = st.text_area(
-        "Any other symptoms not listed above (free text - for the doctor's own reference; "
-        "not used in the probability calculation yet)",
+        "Any other symptoms not listed above (for clinician reference only; not scored by the model). "
+        "Do not enter patient names, phone numbers, or IDs.",
         placeholder="e.g. mild ear pain, occasional dizziness...")
 
     st.subheader("Stage 2 - Medication response")
@@ -168,3 +168,7 @@ with right:
             st.markdown("**Avoid:** " + "; ".join(plan["avoid"]))
             st.markdown("**Monitor:** " + "; ".join(plan["monitor"]))
             st.error("Urgent review if: " + "; ".join(plan["red_flags"]))
+
+st.divider()
+st.caption("Bio Matrix prototype v0.1 · Oct 2026 · No patient data is stored.")
+st.link_button("Report a wrong result / give feedback", "https://forms.gle/YOUR_LINK")
