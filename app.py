@@ -33,6 +33,10 @@ def fmt(f):
     return FEATURES[f]["label"]
 
 
+def fmt_neg(f):
+    return "Not: " + FEATURES[f]["label"]
+
+
 st.title("Bio Matrix: Clinical Decision Support (Prototype v0.1)")
 st.warning(DISCLAIMER)
 
@@ -48,7 +52,7 @@ with st.expander("About this prototype"):
         "which is a simplifying assumption and may not reflect clinical relationships."
     )
     st.markdown(
-        "**Advisor review pending:** Should Leptospirosis-Dengue be included as a possible "
+        "**Open question for clinical review:** Should Leptospirosis-Dengue be included as a possible "
         "co-infection pair? Reported overlap and co-infections exist, but the pair is not flagged here."
     )
 
@@ -69,7 +73,7 @@ with left:
     st.subheader("Stage 1 - Symptoms")
     present = st.multiselect("Symptoms present", names("symptom"), format_func=fmt)
     absent_options = [f for f in names("symptom") if f not in present]
-    absent = st.multiselect("Symptoms confirmed absent (optional)", absent_options, format_func=fmt)
+    absent = st.multiselect("Symptoms confirmed absent (optional)", absent_options, format_func=fmt_neg)
     evidence.update({f: True for f in present})
     evidence.update({f: False for f in absent})
 
@@ -86,7 +90,7 @@ with left:
     st.caption("Free to ask, no test needed - often the strongest clue for diseases like leptospirosis or typhoid.")
     occ_pos = st.multiselect("Exposure factors present", names("occupation"), format_func=fmt)
     occ_neg_options = [f for f in names("occupation") if f not in occ_pos]
-    occ_neg = st.multiselect("Exposure factors confirmed absent (optional)", occ_neg_options, format_func=fmt)
+    occ_neg = st.multiselect("Exposure factors confirmed absent (optional)", occ_neg_options, format_func=fmt_neg)
     evidence.update({f: True for f in occ_pos})
     evidence.update({f: False for f in occ_neg})
 
@@ -94,20 +98,20 @@ with left:
     st.caption("Bedside exam findings cost nothing; a basic CBC (platelet/WBC count) is cheap and widely available.")
     hist_pos = st.multiselect("Exam findings present", names("history"), format_func=fmt)
     hist_neg_options = [f for f in names("history") if f not in hist_pos]
-    hist_neg = st.multiselect("Exam findings confirmed absent (optional)", hist_neg_options, format_func=fmt)
+    hist_neg = st.multiselect("Exam findings confirmed absent (optional)", hist_neg_options, format_func=fmt_neg)
     evidence.update({f: True for f in hist_pos})
     evidence.update({f: False for f in hist_neg})
 
     cbc_pos = st.multiselect("Basic CBC: abnormal values (if already done)", names("basic_lab"), format_func=fmt)
     cbc_neg_options = [f for f in names("basic_lab") if f not in cbc_pos]
-    cbc_neg = st.multiselect("Basic CBC: normal values", cbc_neg_options, format_func=fmt)
+    cbc_neg = st.multiselect("Basic CBC: normal values", cbc_neg_options, format_func=fmt_neg)
     evidence.update({f: True for f in cbc_pos})
     evidence.update({f: False for f in cbc_neg})
 
     st.subheader("Stage 5 - Confirmatory test result")
     lab_pos = st.multiselect("Confirmatory test: positive/abnormal", names("confirmatory_lab"), format_func=fmt)
     lab_neg_options = [f for f in names("confirmatory_lab") if f not in lab_pos]
-    lab_neg = st.multiselect("Confirmatory test: normal/negative", lab_neg_options, format_func=fmt)
+    lab_neg = st.multiselect("Confirmatory test: normal/negative", lab_neg_options, format_func=fmt_neg)
     evidence.update({f: True for f in lab_pos})
     evidence.update({f: False for f in lab_neg})
 
@@ -116,8 +120,14 @@ with right:
     if not evidence:
         st.info("Enter symptoms on the left to see possible conditions.")
     else:
-        if sum(1 for value in evidence.values() if value) < 3:
+        if len(evidence) < 3:
             st.info("Very few findings entered. The ranking is unreliable until more are added.")
+
+        if len(lab_pos) >= 2:
+            st.warning(
+                "Several confirmatory tests are positive. Check for data-entry errors, "
+                "or consider that more than one condition may be present."
+            )
 
         ranked = model.ranked(evidence)
         st.subheader("Possible conditions")
