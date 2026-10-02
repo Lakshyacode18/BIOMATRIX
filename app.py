@@ -1,5 +1,6 @@
 """Streamlit web UI:  streamlit run app.py"""
 import streamlit as st
+import pandas as pd
 
 from knowledge import COINFECTION_PAIRS, DISCLAIMER, DISEASES, FEATURES
 from model import build_model
@@ -120,13 +121,16 @@ with right:
 
         ranked = model.ranked(evidence)
         st.subheader("Possible conditions")
-        st.bar_chart({d: round(p * 100, 1) for d, p in ranked}, horizontal=True)
+        df = pd.DataFrame({"Condition": [d for d, _ in ranked],
+                   "Likelihood": [round(p * 100, 1) for _, p in ranked]})
+        st.bar_chart(df, x="Condition", y="Likelihood", horizontal=True, sort="-Likelihood")
         top, top_p = ranked[0]
         st.metric(
             "Highest-ranked condition",
             top,
             f"{top_p * 100:.0f}% (model estimate)",
             delta_color="off",
+            delta_arrow="off",
         )
         st.caption(
             "Scores are relative likelihoods from a prototype built on synthetic data. "
@@ -166,9 +170,10 @@ with right:
         confirmatory = [f for f in names("confirmatory_lab")]
         st.subheader("Suggested confirmatory test")
         for feature, _ in model.suggest_next(evidence, confirmatory, top_k=3):
-            st.write(f"- **{fmt(feature)}**")
+            st.write(f"- **{fmt(feature).replace(' positive', '')}**")
 
         st.subheader(f"Why {top}?")
+        st.caption("Larger numbers mean the finding pushed the ranking more strongly.")
         for f, score in model.explain(evidence, top)[:6]:
             icon = "🟢" if score > 0 else "🔴"
             state = "present" if evidence[f] else "absent"
