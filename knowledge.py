@@ -1,10 +1,9 @@
 """
-Knowledge base for the AI Doctor Assistant prototype.
+Bio Matrix prototype knowledge base.
 
-IMPORTANT: The numbers below are ILLUSTRATIVE, hand-written values used to
-generate SYNTHETIC training data for a college prototype. They are NOT clinical
-statistics. Before any real use they must be replaced with data/guidelines
-reviewed by qualified doctors.
+IMPORTANT: The probabilities are illustrative, hand-written estimates that have
+not been clinically validated. They are not clinical statistics or learned from
+patient data, and require qualified-doctor review before any real-world use.
 """
 
 # Disease names are the keys used by priors and feature probabilities below.
@@ -115,9 +114,10 @@ TREATMENT_NOTES = {
     "Leptospirosis": "Early antibiotics (e.g. doxycycline for mild cases, IV penicillin/ceftriaxone for severe) plus supportive care; monitor kidney and liver function.",
 }
 
-DISCLAIMER = ("Decision-support prototype trained on SYNTHETIC data. Not a medical device. "
-              "Intended for use by qualified doctors. Final diagnosis and treatment must be made "
-              "by a qualified doctor. No patient data is stored.")
+DISCLAIMER = ("Decision-support prototype built on illustrative, hand-written estimates that have not been "
+              "clinically validated. Not a medical device. Intended for use by qualified doctors. "
+              "Final diagnosis and treatment must be made by a qualified doctor. "
+              "No patient data is stored.")
 
 
 def validate_knowledge():

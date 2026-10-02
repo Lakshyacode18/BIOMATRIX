@@ -1,5 +1,5 @@
 """
-AI Doctor Assistant - command line version.
+Bio Matrix - command line version.
 
   python main.py             interactive, stage by stage
   python main.py --demo      scripted dengue example

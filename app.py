@@ -120,7 +120,7 @@ with right:
     if not evidence:
         st.info("Enter symptoms on the left to see possible conditions.")
     else:
-        if len(evidence) < 3:
+        if sum(evidence.values()) < 3:
             st.info("Very few findings entered. The ranking is unreliable until more are added.")
 
         if len(lab_pos) >= 2:
@@ -145,7 +145,7 @@ with right:
             delta_arrow="off",
         )
         st.caption(
-            "Scores are relative likelihoods from a prototype built on synthetic data. "
+            "Scores are relative likelihoods calculated from illustrative, unvalidated estimates. "
             "They are not clinical probabilities and may be overconfident."
         )
 

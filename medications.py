@@ -1,5 +1,5 @@
 """
-Medication reference for the AI Doctor Assistant prototype.
+Medication reference for the Bio Matrix prototype.
 
 For the DOCTOR to review - this is a decision-support reference, not a prescription.
 Doses are intentionally NOT included: they depend on age, weight, kidney/liver function,
