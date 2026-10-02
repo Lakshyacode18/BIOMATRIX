@@ -136,4 +136,12 @@ def validate_knowledge():
             )
 
 
+try:
+    from reviewed_values import apply_overrides
+
+    apply_overrides(FEATURES, PRIORS, DISEASES)
+except ImportError:
+    pass  # no doctor-reviewed values yet
+
+
 validate_knowledge()

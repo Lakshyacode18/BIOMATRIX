@@ -28,13 +28,22 @@ All condition probabilities are learned from illustrative synthetic data. This i
 
 ## Clinical review worksheet
 
-Generate `review_sheet.csv` with the current disease priors and feature values:
+Generate `review_sheet.csv` and the doctor-editable `review_sheet.xlsx` with current priors and feature values:
 
 ```powershell
 python generate_review_sheet.py
 ```
 
-The worksheet leaves doctor values and sources blank for qualified review. The rows for paracetamol response, relative bradycardia, and disease priors include review prompts; do not replace the current illustrative values without qualified review and cited sources.
+The generator writes `review_sheet.csv` and `review_sheet.xlsx`. The workbook has `Review` and `Priors` sheets with Decision dropdowns. The rows for paracetamol response, relative bradycardia, priors, and probability calibration include review prompts; do not replace the illustrative values without qualified review and cited sources. Keep completed workbooks private; `.xlsx` files are ignored by Git.
+
+To turn a returned workbook into a separate, auditable override module:
+
+```powershell
+python apply_review.py returned_sheet.xlsx --reviewer "Dr A. Sharma, GP" --dry-run
+python apply_review.py returned_sheet.xlsx --reviewer "Dr A. Sharma, GP"
+```
+
+The first command previews proposed changes only. The second writes `reviewed_values.py`, containing each changed value, its previous value, source, comment, reviewer, and workbook metadata. To enable the reviewed values, `knowledge.py` optionally imports and applies that module before validating the knowledge base; to switch them off, remove or rename `reviewed_values.py`. Only rows with a Doctor value and Decision set to `Change` or blank are applied. `Agree` and `Unsure` rows are skipped. Enter values as decimals from 0 to 1 or percent strings such as `60%`; bare values like `60` are rejected.
 
 ## Evaluate published cases
 
