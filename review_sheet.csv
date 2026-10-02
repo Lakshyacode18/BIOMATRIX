@@ -1,4 +1,5 @@
 disease,feature,kind,model_value,doctor_value,source,comment
+All diseases,Probability calibration,model_review,Uncalibrated,,,"Review probability calibration on an independent set of published, de-identified cases; the current model percentages may be overconfident."
 Viral fever,Assumed disease prior,prior,0.33,,,"Review against the intended season, region, and clinic type; this is a synthetic starting assumption."
 Viral fever,Fever,symptom,0.9,,,
 Viral fever,Headache,symptom,0.5,,,

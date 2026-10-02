@@ -5,6 +5,10 @@ from knowledge import DISEASES, FEATURES, PRIORS
 
 
 REVIEW_NOTES = {
+    "__calibration__": (
+        "Review probability calibration on an independent set of published, de-identified cases; "
+        "the current model percentages may be overconfident."
+    ),
     "__prior__": (
         "Review against the intended season, region, and clinic type; this is a synthetic starting assumption."
     ),
@@ -28,6 +32,16 @@ def generate_review_sheet(path="review_sheet.csv"):
             "doctor_value",
             "source",
             "comment",
+        ])
+
+        writer.writerow([
+            "All diseases",
+            "Probability calibration",
+            "model_review",
+            "Uncalibrated",
+            "",
+            "",
+            REVIEW_NOTES["__calibration__"],
         ])
 
         for disease in DISEASES:

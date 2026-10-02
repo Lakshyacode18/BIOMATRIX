@@ -125,16 +125,18 @@ with right:
                    "Likelihood": [round(p * 100, 1) for _, p in ranked]})
         st.bar_chart(df, x="Condition", y="Likelihood", horizontal=True, sort="-Likelihood")
         top, top_p = ranked[0]
+        pct = top_p * 100
+        shown = ">99% (model estimate)" if pct > 99 else f"{pct:.0f}% (model estimate)"
         st.metric(
             "Highest-ranked condition",
             top,
-            f"{top_p * 100:.0f}% (model estimate)",
+            shown,
             delta_color="off",
             delta_arrow="off",
         )
         st.caption(
             "Scores are relative likelihoods from a prototype built on synthetic data. "
-            "They are not clinical probabilities."
+            "They are not clinical probabilities and may be overconfident."
         )
 
         for a, b, pa, pb in model.possible_coinfections(evidence, COINFECTION_PAIRS):
